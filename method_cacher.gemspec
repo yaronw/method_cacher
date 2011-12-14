@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
-require File.expand_path('../lib/method_cacher/version', __FILE__)
+$:.push File.expand_path("../lib", __FILE__)  # $: is the load path
+require 'method_cacher/version'
 
 Gem::Specification.new do |gem|
   gem.authors       = ["Yaron Walfish"]
@@ -15,6 +16,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = MethodCacher::VERSION
 
-  gem.add_development_dependency "rspec"
-  gem.add_development_dependency "supermodel"
+  gem.add_development_dependency 'rspec'
+  gem.add_development_dependency 'supermodel'
+  gem.add_development_dependency 'activesupport'
 end

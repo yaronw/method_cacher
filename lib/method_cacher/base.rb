@@ -1,6 +1,17 @@
-module MethodCacher
+require 'active_support/concern'
+require 'active_support/core_ext'
+require 'set'
 
-  module ModelAdditions
+
+module MethodCacher
+  class <<self
+    mattr_accessor :caching_strategy
+
+    self.caching_strategy = Rails.cache if defined? Rails
+  end
+
+
+  module Base
     extend ActiveSupport::Concern
 
     module ClassMethods
@@ -74,11 +85,11 @@ module MethodCacher
 
           def #{method_name}(*args)
             key = cached_method_key(:#{method_name}, *args)
-            key.nil? ? uncached_#{method_name}(*args) : Rails.cache.fetch(key) { uncached_#{method_name}(*args) }  # cache only for non nil keys
+            key.nil? ? uncached_#{method_name}(*args) : MethodCacher.caching_strategy.fetch(key) { uncached_#{method_name}(*args) }  # cache only for non nil keys
           end
 
           def clear_cache_for_#{method_name}(*args)
-            Rails.cache.delete(cached_method_key(:#{method_name}, *args))
+            MethodCacher.caching_strategy.delete(cached_method_key(:#{method_name}, *args))
           end
         END_EVAL
       end
@@ -92,11 +103,11 @@ module MethodCacher
             alias :uncached_#{method_name} :#{method_name}
 
             def #{method_name}(*args)
-              Rails.cache.fetch(singleton_cached_method_key(:#{method_name}, *args)) { uncached_#{method_name}(*args) }
+              MethodCacher.caching_strategy.fetch(singleton_cached_method_key(:#{method_name}, *args)) { uncached_#{method_name}(*args) }
             end
 
             def clear_cache_for_#{method_name}(*args)
-              Rails.cache.delete(singleton_cached_method_key(:#{method_name}, *args))
+              MethodCacher.caching_strategy.delete(singleton_cached_method_key(:#{method_name}, *args))
             end
           end
         END_EVAL
@@ -108,7 +119,7 @@ module MethodCacher
 
       # A helper that clears the cache for all the cached methods of this object that are argument-less.
       def clear_method_cache
-        self.class.cached_methods.each { |method_name| Rails.cache.delete(cached_method_key(method_name)) }
+        self.class.cached_methods.each { |method_name| MethodCacher.caching_strategy.delete(cached_method_key(method_name)) }
       end
 
       private

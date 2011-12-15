@@ -10,7 +10,6 @@ module MethodCacher
     self.caching_strategy = Rails.cache if defined? Rails
   end
 
-
   module Base
     extend ActiveSupport::Concern
 

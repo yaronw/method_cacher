@@ -132,30 +132,3 @@ module MethodCacher
     end
   end
 end
-
-#ActiveRecord::Base.send :include, MethodCacher::Base
-
-# A little test
-=begin
-
-class A
-  include CachesMethod
-
-  def id
-    object_id
-  end
-
-  caches_method :a, :obj_key => proc { |s| s.object_id }
-  def a(*args)
-    args << Time.now
-  end
-
-  caches_method singleton: :sa
-  class <<self
-    def sa(*args)
-      args << Time.now
-    end
-  end
-end
-
-=end

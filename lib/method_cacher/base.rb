@@ -15,8 +15,8 @@ module MethodCacher
 
     module ClassMethods
       # default object key proc
-      OBJECT_KEY_PROC_DEFAULT = lambda do |o|
-        o.id if o.respond_to?(:id)
+      OBJECT_KEY_PROC_DEFAULT = lambda do |obj|
+        obj.id if obj.respond_to?(:id)
       end
 
       attr_accessor :methods_to_be_cached, :cached_methods, :obj_key
@@ -32,12 +32,12 @@ module MethodCacher
         self.methods_to_be_cached += method_names
         self.singleton_methods_to_be_cached += [options[:singleton]].flatten
 
-        # Cache all instance methods given in the parameters that are currently defined.
+        # Cache all currently defined instance methods that are given in the parameters .
         self.methods_to_be_cached.clone.each do |method_name|
           add_cached_method(method_name) if (private_instance_methods + protected_instance_methods + public_instance_methods).include?(method_name)
         end
 
-        # Cache all singleton methods given in the parameters that are currently defined.
+        # Cache all currently defined singleton methods given in the parameters.
         self.singleton_methods_to_be_cached.clone.each do |method_name|
           singleton_add_cached_method(method_name) if singleton_methods.include?(method_name)
         end
@@ -72,7 +72,7 @@ module MethodCacher
 
       # Creates the key used to cache a singleton method of the object.
       def singleton_cached_method_key(method_name, *args)
-        [self.class.name, method_name, *args]
+        [self.name, method_name, *args]
       end
 
       # Adds code to the class to cache the given instance method.

@@ -146,19 +146,56 @@ describe MethodCacher::Base do
       end
     end
 
-    describe "dynamic methods created" do
+    describe "dynamic methods creation" do
       context "when caching an instance method" do
-        it "should include a method that calls the original uncached method" do
+        it "should include a method named uncached_[name of original method] that calls the original uncached method" do
           obj = FirstClass.new
-          obj.uncached_foo1 == obj.foo1.should_not # uncached function should not cache
-          obj.uncached_foo1.should == Dummy.current_value  # uncached function should call original method
+
+          # works for methods without arguments
+          lambda { obj.uncached_foo1 }.should_not be_twice_the_same # uncached function should not cache      # for testing this assertion: def uncached_#{method_name} \n rand 1000000000 \n end
+          obj.uncached_foo1.should == Dummy.current_value  # uncached function should call original method    # for testing this assertion: def uncached_#{method_name} \n 1 \n end
+
+          # works for methods with arguments
+          lambda { obj.uncached_foo1(1,2) }.should_not be_twice_the_same # uncached function should not cache
+          obj.uncached_foo1(1,2).should == Dummy.current_value(1,2)  # uncached function should call original method
+        end
+
+        it "should include a method named clear_cache_for_[name of original method] that clears the cache for a specific method with specific arguments" do
+          obj = FirstClass.new
+
+          # works for methods without arguments
+          val = obj.foo1
+          obj.clear_cache_for_foo1
+          obj.foo1.should_not == val
+
+          # works for methods with arguments
+          val = obj.foo1(1,2)
+          obj.clear_cache_for_foo1(1,2)
+          obj.foo1(1,2).should_not == val
         end
       end
 
       context "when caching a singleton method" do
         it "should include a method that calls the original uncached method" do
-          FirstClass.uncached_bar1 == FirstClass.bar1.should_not # uncached function should not cache
+          # works for methods without arguments
+          lambda { FirstClass.uncached_bar1 }.should_not be_twice_the_same # should not cache
           FirstClass.uncached_bar1.should == Dummy.current_value  # uncached function should call original method
+
+          # works for methods with arguments
+          lambda { FirstClass.uncached_bar1(1,2) }.should_not be_twice_the_same # should not cache
+          FirstClass.uncached_bar1(1,2).should == Dummy.current_value(1,2)  # uncached function should call original method
+        end
+
+        it "should include a method named clear_cache_for_[name of original method] that clears the cache for a specific method with specific arguments" do
+          # works for methods without arguments
+          val = FirstClass.bar1
+          FirstClass.clear_cache_for_bar1
+          FirstClass.bar1.should_not == val
+
+          # works for methods with arguments
+          val = FirstClass.bar1(1,2)
+          FirstClass.clear_cache_for_bar1(1,2)
+          FirstClass.bar1(1,2).should_not == val
         end
       end
     end

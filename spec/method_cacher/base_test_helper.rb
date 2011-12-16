@@ -3,6 +3,11 @@ module Dummy
   @@counter = 0
   def self.function(*args)
     @@counter += 1
+    current_value(*args)
+  end
+
+  # returns the current value of function without changin it
+  def self.current_value(*args)
     "#{@@counter} #{args}"
   end
 end

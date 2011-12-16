@@ -88,7 +88,6 @@ module MethodCacher
         self.cached_methods <<= method_name
         class_eval <<-END_EVAL, __FILE__, __LINE__ + 1
           alias :uncached_#{method_name} :#{method_name}
-
           def #{method_name}(*args)
             key = cached_method_key(:#{method_name}, *args)
             key.nil? ? uncached_#{method_name}(*args) : MethodCacher.caching_strategy.fetch(key) { uncached_#{method_name}(*args) }  # cache only for non-nil keys
@@ -107,7 +106,6 @@ module MethodCacher
         class_eval <<-END_EVAL, __FILE__, __LINE__ + 1
           class <<self
             alias :uncached_#{method_name} :#{method_name}
-
             def #{method_name}(*args)
               MethodCacher.caching_strategy.fetch(singleton_cached_method_key(:#{method_name}, *args)) { uncached_#{method_name}(*args) }
             end

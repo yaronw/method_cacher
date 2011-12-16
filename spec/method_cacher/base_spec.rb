@@ -1,8 +1,6 @@
 require 'spec_helper'
 require 'active_support/cache'
 require 'method_cacher/base_test_helper'
-#require 'debug'
-
 
 MethodCacher.caching_strategy = ActiveSupport::Cache.lookup_store(:memory_store)
 
@@ -139,7 +137,9 @@ describe MethodCacher::Base do
       obj2.foo.should_not == obj1.foo
     end
 
-    it "should raise an exception if neither an :obj_key option is given nor a default key is defined"
-
+    it "should raise an exception if neither an :obj_key option is given nor the default fallback :id method is defined" do
+      obj = SixthClass.new
+      lambda { obj.foo }.should raise_error(NoMethodError)
+    end
   end
 end

@@ -131,7 +131,7 @@ class FifthClass
   end
 end
 
-# for testing when the :obj_key option is undefined
+# for testing when the :obj_key option is undefined and the default id method is missing
 class SixthClass
   include  MethodCacher::Base
 

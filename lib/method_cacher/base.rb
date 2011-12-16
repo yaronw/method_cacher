@@ -2,7 +2,6 @@ require 'active_support/concern'
 require 'active_support/core_ext'
 require 'set'
 
-
 module MethodCacher
   class <<self
     mattr_accessor :caching_strategy
@@ -13,11 +12,10 @@ module MethodCacher
   module Base
     extend ActiveSupport::Concern
 
+       # default object key proc
+    OBJECT_KEY_PROC_DEFAULT = lambda { |obj| obj.id }
+
     module ClassMethods
-      # default object key proc
-      OBJECT_KEY_PROC_DEFAULT = lambda do |obj|
-        obj.id if obj.respond_to?(:id)
-      end
 
       attr_accessor :methods_to_be_cached, :cached_methods, :obj_key
       attr_accessor :singleton_methods_to_be_cached, :singleton_cached_methods
@@ -59,9 +57,18 @@ module MethodCacher
 
       private
 
+      # Initialize class instance variables for instance method caching.
       def initialize_variables
-        # initialize class instance variables for instance method caching
-        self.obj_key ||= OBJECT_KEY_PROC_DEFAULT  # identifies the object of this class, defaults to the object's id or name if defined
+        self.obj_key ||= OBJECT_KEY_PROC_DEFAULT # identifies the object of this class, defaults to the object's id if defined
+
+        #if !self.obj_key
+        #  if method_defined? :id
+        #     self.obj_key = lambda { |obj| obj.id }
+        #  else
+        #    raise Exception.new "There's no object key defined.  Please supply an id instance method, or pass an proc to the :obj_key option of caches_method."
+        #  end
+        #end
+
         self.methods_to_be_cached ||= Set.new  # stores the names of the methods designated to be cached
         self.cached_methods ||= Set.new # stores the methods that are cached
 
@@ -84,7 +91,7 @@ module MethodCacher
 
           def #{method_name}(*args)
             key = cached_method_key(:#{method_name}, *args)
-            key.nil? ? uncached_#{method_name}(*args) : MethodCacher.caching_strategy.fetch(key) { uncached_#{method_name}(*args) }  # cache only for non nil keys
+            key.nil? ? uncached_#{method_name}(*args) : MethodCacher.caching_strategy.fetch(key) { uncached_#{method_name}(*args) }  # cache only for non-nil keys
           end
 
           def clear_cache_for_#{method_name}(*args)
@@ -126,7 +133,7 @@ module MethodCacher
       # Creates the key used to cache a method of the object.
       def cached_method_key(method_name, *args)
         obj_key = self.class.obj_key.call(self)
-        obj_key.nil? ? nil : [self.class.name, obj_key, method_name, *args]  # if obj_key is nil, the key is nil
+        [self.class.name, obj_key, method_name, *args]
       end
     end
   end

@@ -4,9 +4,19 @@ require 'set'
 
 module MethodCacher
   class <<self
-    mattr_accessor :caching_strategy
+    @@caching_strategy = nil
 
-    self.caching_strategy = Rails.cache if defined? Rails
+    def caching_strategy= strategy
+      @@caching_strategy = strategy
+    end
+
+    def caching_strategy
+      if @@caching_strategy
+        @@caching_strategy
+      elsif defined? Rails
+        Rails.cache
+      end
+    end
   end
 
   module Base

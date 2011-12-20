@@ -3,18 +3,35 @@ require 'active_support/core_ext'
 require 'set'
 
 module MethodCacher
-  class <<self
-    @@caching_strategy = nil
-
+  # An object that holds configuration vars for MethodCacher
+  class Configuration
     def caching_strategy= strategy
-      @@caching_strategy = strategy
+      @caching_strategy = strategy
     end
 
     def caching_strategy
-      if @@caching_strategy
-        @@caching_strategy
+      if @caching_strategy
+        @caching_strategy
       elsif defined? Rails
-        Rails.cache
+        Rails.cache  # default to the rails caching strategy if it's a Rails app
+      end
+    end
+  end
+
+  @@config = MethodCacher::Configuration.new
+  mattr_reader :config
+
+  # Gives a block configuration style like that of Rails.
+  def self.configure(&block)
+    if block_given?
+      if block.arity == 1
+        # allows this style config: MethodCacher.configure do |config| config.variable = ... end
+        yield config
+      else
+        # allows this style config: MethodCacher.configure do config.variable = ... end
+        # While this option is more elegant because it doesn't require a block variable, it loses access to
+        # methods defined in the calling context because the context switches to that of the this object.
+        instance_eval &block
       end
     end
   end
@@ -100,11 +117,11 @@ module MethodCacher
           alias :uncached_#{method_name} :#{method_name}
           def #{method_name}(*args)
             key = cached_method_key(:#{method_name}, *args)
-            key.nil? ? uncached_#{method_name}(*args) : MethodCacher.caching_strategy.fetch(key) { uncached_#{method_name}(*args) }  # cache only for non-nil keys
+            key.nil? ? uncached_#{method_name}(*args) : MethodCacher.config.caching_strategy.fetch(key) { uncached_#{method_name}(*args) }  # cache only for non-nil keys
           end
 
           def clear_cache_for_#{method_name}(*args)
-            MethodCacher.caching_strategy.delete(cached_method_key(:#{method_name}, *args))
+            MethodCacher.config.caching_strategy.delete(cached_method_key(:#{method_name}, *args))
           end
         END_EVAL
       end
@@ -117,11 +134,11 @@ module MethodCacher
           class <<self
             alias :uncached_#{method_name} :#{method_name}
             def #{method_name}(*args)
-              MethodCacher.caching_strategy.fetch(singleton_cached_method_key(:#{method_name}, *args)) { uncached_#{method_name}(*args) }
+              MethodCacher.config.caching_strategy.fetch(singleton_cached_method_key(:#{method_name}, *args)) { uncached_#{method_name}(*args) }
             end
 
             def clear_cache_for_#{method_name}(*args)
-              MethodCacher.caching_strategy.delete(singleton_cached_method_key(:#{method_name}, *args))
+              MethodCacher.config.caching_strategy.delete(singleton_cached_method_key(:#{method_name}, *args))
             end
           end
         END_EVAL
@@ -133,7 +150,7 @@ module MethodCacher
 
       # A helper that clears the cache for all the cached methods of this object that are argument-less.
       def clear_method_cache
-        self.class.cached_methods.each { |method_name| MethodCacher.caching_strategy.delete(cached_method_key(method_name)) }
+        self.class.cached_methods.each { |method_name| MethodCacher.config.caching_strategy.delete(cached_method_key(method_name)) }
       end
 
       private

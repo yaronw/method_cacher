@@ -2,9 +2,35 @@ require 'spec_helper'
 require 'active_support/cache'
 require 'method_cacher/base_test_helper'
 
-MethodCacher.caching_strategy = ActiveSupport::Cache.lookup_store(:memory_store)
+describe MethodCacher::Configuration do
+  describe "yield style configuration" do
+    it "should assign configuration variables" do
+      MethodCacher.configure do |c|
+        c.caching_strategy = "test1"
+      end
+
+      MethodCacher.config.caching_strategy.should == "test1"
+    end
+  end
+
+  describe "eval style configuration" do
+    it "should assign configuration variables" do
+      MethodCacher.configure do
+        config.caching_strategy = "test2"
+      end
+
+      MethodCacher.config.caching_strategy.should == "test2"
+    end
+  end
+end
 
 describe MethodCacher::Base do
+  before (:all) do
+    MethodCacher.configure do
+      config.caching_strategy = ActiveSupport::Cache.lookup_store(:memory_store)
+    end
+  end
+
   describe "#caches_method" do
     context "when specified BEFORE the declaration of the functions to be cached" do
       it "should cache the instance method associated with the names given in the arguments" do

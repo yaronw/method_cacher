@@ -30,7 +30,7 @@ module MethodCacher
       else
         # allows this style config: MethodCacher.configure do config.variable = ... end
         # While this option is more elegant because it doesn't require a block variable, it loses access to
-        # methods defined in the calling context because the context switches to that of the this object.
+        # methods defined in the calling context because the context switches to that of the self object.
         instance_eval &block
       end
     end

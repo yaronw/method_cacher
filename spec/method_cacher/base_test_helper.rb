@@ -146,3 +146,119 @@ class SixthClass
     Dummy.function
   end
 end
+
+# for testing adding methods to be cached using separate caches_method calls
+class SeventhClass
+  include MethodCacher::Base
+
+  def id
+    object_id
+  end
+
+  caches_method :foo1, singleton: :bar1
+  caches_method :foo2, singleton: :bar2
+  caches_method :foo3, :foo4, singleton: [:bar3, :bar4]
+
+  # test instance methods.
+  def foo1
+    Dummy.function
+  end
+
+  def foo2
+    Dummy.function
+  end
+
+  def foo3
+    Dummy.function
+  end
+
+  def foo4
+    Dummy.function
+  end
+
+  def foo5
+    Dummy.function
+  end
+
+  def foo6
+    Dummy.function
+  end
+
+  def foo7
+    Dummy.function
+  end
+
+  def foo8
+    Dummy.function
+  end
+
+  class <<self
+    # test singleton (i.e. class) methods.
+    def bar1
+      Dummy.function
+    end
+
+    def bar2
+      Dummy.function
+    end
+
+    def bar3
+      Dummy.function
+    end
+
+    def bar4
+      Dummy.function
+    end
+
+    def bar5
+      Dummy.function
+    end
+
+    def bar6
+      Dummy.function
+    end
+
+    def bar7
+      Dummy.function
+    end
+
+    def bar8
+      Dummy.function
+    end
+  end
+
+  caches_method :foo5, singleton: :bar5
+  caches_method :foo6, singleton: :bar6
+  caches_method :foo7, :foo8, singleton: [:bar7, :bar8]
+end
+
+# for testing caching of private and protected instance methods
+class EighthClass
+  include MethodCacher::Base
+
+  def id
+    object_id
+  end
+
+  caches_method :foo1, :foo3
+
+  protected
+  def foo1
+    Dummy.function
+  end
+
+  def foo2
+    Dummy.function
+  end
+
+  private
+  def foo3
+    Dummy.function
+  end
+
+  def foo4
+    Dummy.function
+  end
+
+  #caches_method :foo2, :foo4
+end

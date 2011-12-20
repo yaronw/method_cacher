@@ -32,8 +32,8 @@ describe MethodCacher::Base do
   end
 
   describe "#caches_method" do
-    context "when specified BEFORE the declaration of the functions to be cached" do
-      it "should cache the instance method associated with the names given in the arguments" do
+    context "when specified BEFORE the declaration of the methods to be cached" do
+      it "should cache the INSTANCE method associated with the names given in the arguments" do
         obj = FirstClass.new
         [:foo1, :foo2].each do |name|
           lambda { obj.send(name) }.should be_twice_the_same # verify that original function is not called twice
@@ -41,25 +41,49 @@ describe MethodCacher::Base do
         end
       end
 
-      it "should not cache instance methods whose names are not given in the arguments" do
+      it "should not cache INSTANCE methods whose names are not given in the arguments" do
         obj = FirstClass.new
         lambda { obj.foo3 }.should_not be_twice_the_same
       end
 
-      it "should cache the singleton methods associated with the names given in the :singleton option array" do
+      it "should cache the SINGLETON methods associated with the names given in the :singleton option array" do
         [:bar1, :bar2].each do |name|
           lambda { FirstClass.send(name) }.should be_twice_the_same
           FirstClass.send(name).should == Dummy.current_value
         end
       end
 
-      it "should not cache singleton methods whose names are not given in the :singleton option" do
+      it "should not cache SINGLETON methods whose names are not given in the :singleton option" do
         lambda { FirstClass.bar3 }.should_not be_twice_the_same
+      end
+
+      it "should cache INSTANCE methods given in separate calls" do
+        (1..4).to_a.collect { |x| :"foo#{x}" }.each do |name|
+          obj = SeventhClass.new
+          lambda { obj.send(name) }.should be_twice_the_same
+        end
+      end
+
+      it "should cache SINGLETON methods given in separate calls" do
+        (1..4).to_a.collect { |x| :"bar#{x}" }.each do |name|
+          lambda { SeventhClass.send(name) }.should be_twice_the_same
+        end
+      end
+
+      it "should cache protected INSTANCE methods" do
+        obj = EighthClass.new
+        debugger
+        lambda { obj.send(:foo1) }.should be_twice_the_same
+      end
+
+      it "should cache private INSTANCE methods" do
+        obj = EighthClass.new
+        lambda { obj.send(:foo3) }.should be_twice_the_same
       end
     end
 
-    context "when specified AFTER the declaration of the functions to be cached" do
-      it "should cache the instance method associated with the names given in the arguments" do
+    context "when specified AFTER the declaration of the methods to be cached" do
+      it "should cache the INSTANCE method associated with the names given in the arguments" do
         obj = SecondClass.new
         [:foo1, :foo2].each do |name|
           lambda { obj.send(name) }.should be_twice_the_same
@@ -67,25 +91,48 @@ describe MethodCacher::Base do
         end
       end
 
-      it "should not cache instance methods whose names are not given in the arguments" do
+      it "should not cache INSTANCE methods whose names are not given in the arguments" do
         obj = SecondClass.new
         lambda { obj.foo3 }.should_not be_twice_the_same
       end
 
-      it "should cache the singleton methods associated with the names given in the :singleton option array" do
+      it "should cache the SINGLETON methods associated with the names given in the :singleton option array" do
         [:bar1, :bar2].each do |name|
           lambda { SecondClass.send(name) }.should be_twice_the_same
           SecondClass.send(name).should == Dummy.current_value
         end
       end
 
-      it "should not cache singleton methods whose names are not given in the :singleton option" do
+      it "should not cache SINGLETON methods whose names are not given in the :singleton option" do
         lambda { SecondClass.bar3 }.should_not be_twice_the_same
+      end
+
+      it "should cache INSTANCE methods given in separate calls" do
+        (5..8).to_a.collect { |x| :"foo#{x}" }.each do |name|
+          obj = SeventhClass.new
+          lambda { obj.send(name) }.should be_twice_the_same
+        end
+      end
+
+      it "should cache SINGLETON methods given in separate calls" do
+        (5..8).to_a.collect { |x| :"bar#{x}" }.each do |name|
+          lambda { SeventhClass.send(name) }.should be_twice_the_same
+        end
+      end
+
+      it "should cache protected INSTANCE methods" do
+        obj = EighthClass.new
+        lambda { obj.send(:foo2) }.should be_twice_the_same
+      end
+
+      it "should cache private INSTANCE methods" do
+        obj = EighthClass.new
+        lambda { obj.send(:foo4) }.should be_twice_the_same
       end
     end
 
-    describe "cache key mechanism for instance methods" do
-      context "when caching an instance method of one object" do
+    describe "cache key mechanism for INSTANCE methods" do
+      context "when caching an INSTANCE method of one object" do
         it "should have different sets of arguments cache separately" do
           obj = FirstClass.new
           lambda { obj.foo1(1,2) }.should be_twice_the_same
@@ -94,7 +141,7 @@ describe MethodCacher::Base do
         end
       end
 
-      context "when caching the same instance method with identical parameter sets and of the same class" do
+      context "when caching the same INSTANCE method with identical parameter sets and of the same class" do
         it "should have objects whose :obj_key proc evaluates differently cache separately" do
           obj1 = ThirdClass.new
           obj1.obj_key = 1
@@ -120,7 +167,7 @@ describe MethodCacher::Base do
         end
       end
 
-      context "when caching instance methods of identical names with identical parameter sets, and identical :obj_key proc values" do
+      context "when caching INSTANCE methods of identical names with identical parameter sets, and identical :obj_key proc values" do
         it "should have different classes cache separately" do
           obj1 = ThirdClass.new
           obj1.obj_key = 1
@@ -153,8 +200,8 @@ describe MethodCacher::Base do
       end
     end
 
-    describe "cache key mechanism for singleton methods" do
-      context "when caching a singleton method of one class" do
+    describe "cache key mechanism for SINGLETON methods" do
+      context "when caching a SINGLETON method of one class" do
         it "should have different sets of arguments cache separately" do
           lambda { FirstClass.bar1(1,2) }.should be_twice_the_same
           lambda { FirstClass.bar1(1,3) }.should be_twice_the_same
@@ -162,7 +209,7 @@ describe MethodCacher::Base do
         end
       end
 
-      context "when caching singleton methods of identical names with identical parameter sets" do
+      context "when caching SINGLETON methods of identical names with identical parameter sets" do
         it "should have different classes cache separately" do
           ThirdClass.bar # cache methods
           FourthClass.bar
@@ -173,7 +220,7 @@ describe MethodCacher::Base do
     end
 
     describe "dynamic methods creation" do
-      context "when caching an instance method" do
+      context "when caching an INSTANCE method" do
         it "should include a method named uncached_[name of original method] that calls the original uncached method" do
           obj = FirstClass.new
 
@@ -201,7 +248,7 @@ describe MethodCacher::Base do
         end
       end
 
-      context "when caching a singleton method" do
+      context "when caching a SINGLETON method" do
         it "should include a method that calls the original uncached method" do
           # works for methods without arguments
           lambda { FirstClass.uncached_bar1 }.should_not be_twice_the_same # should not cache

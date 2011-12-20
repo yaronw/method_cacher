@@ -57,7 +57,7 @@ module MethodCacher
         self.methods_to_be_cached += method_names
         self.singleton_methods_to_be_cached += [options[:singleton]].flatten
 
-        # Cache all currently defined instance methods that are given in the parameters .
+        # Cache all currently defined instance methods that are given in the parameters.
         self.methods_to_be_cached.clone.each do |method_name|
           add_cached_method(method_name) if (private_instance_methods + protected_instance_methods + public_instance_methods).include?(method_name)
         end
@@ -72,7 +72,7 @@ module MethodCacher
       def method_added(method_name)
         super
         initialize_variables
-        add_cached_method(method_name) if self.methods_to_be_cached.include?(method_name)
+        add_cached_method(method_name) if self.methods_to_be_cached.include?(method_name) #and  public_instance_methods.include?(method_name) # commented section is for testing the related spec
       end
 
       # Same as method_added but for singleton methods.
@@ -87,14 +87,6 @@ module MethodCacher
       # Initialize class instance variables for instance method caching.
       def initialize_variables
         self.obj_key ||= OBJECT_KEY_PROC_DEFAULT # identifies the object of this class, defaults to the object's id if defined
-
-        #if !self.obj_key
-        #  if method_defined? :id
-        #     self.obj_key = lambda { |obj| obj.id }
-        #  else
-        #    raise Exception.new "There's no object key defined.  Please supply an id instance method, or pass an proc to the :obj_key option of caches_method."
-        #  end
-        #end
 
         self.methods_to_be_cached ||= Set.new  # stores the names of the methods designated to be cached
         self.cached_methods ||= Set.new # stores the methods that are cached
@@ -113,6 +105,8 @@ module MethodCacher
       def add_cached_method(method_name)
         self.methods_to_be_cached.delete(method_name)
         self.cached_methods <<= method_name
+
+        # TODO: Make cached methods have the same accessibility (i.e. public/private/protected) as the original method.
         class_eval <<-END_EVAL, __FILE__, __LINE__ + 1
           alias :uncached_#{method_name} :#{method_name}
           def #{method_name}(*args)

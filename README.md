@@ -8,7 +8,7 @@ __Features:__
 + Differentiates among calls to a method with different arguments.
 + Generates methods to provide access the original uncached methods.
 + Generates methods to clear the cache of each cached method.
-+ To specify methods to be cached, just call `caches_method :method1, :method2 ...` before or after the actual definition of `method1` and `method2`.
++ To specify methods to be cached, just call `caches_method :foo, :bar ...` before or after the actual definition of `foo` and `bar`.
 + When used with Rails, it automatically uses the cache store configured in Rails.
 
 ## Installation
@@ -38,7 +38,7 @@ The module is included automatically for ActiveRecord when used in Rails.
 Call `cache_method` from within the class definition, listing the names of the methods that are to be cached.
 
 ```ruby
-cache_method :instance_method1, :instance_method1, singleton: [:singleton_method1, :singleton_method2], obj_key: proc { |obj| obj.obj_key }
+cache_method :instance_foo, :instance_bar, singleton: [:singleton_foo, :singleton_bar], obj_key: proc { |obj| obj.obj_key }
 ```
 
 Instance methods are specified as symbol arguments.
@@ -69,4 +69,17 @@ end
 cache_method :bar # this also works
 ```
 
+`cache_method` replaces each specified method with a cached version.
 
+The cached versions take the same arguments as the originals, with different arguments caching separately.
+
+Each of the original methods is made accessible through the alias `uncached_` followed by the method's name.
+E.g. if the method is `foo`, the original is aliased as `uncached_foo`.
+
+`cache_method` also adds methods to clear the cache of each cached method.
+These methods are named `clear_cache_for_` followed by the cached method's name.
+The clear cache methods take identical arguments as their respective original and cached methods, and only
+clear the cache for the given set of arguments.
+
+So for example, issuing `clear_cache_for_foo('a')`, would clear the cache for a call to `foo('a')`
+but not to `foo('b')`.

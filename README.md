@@ -23,11 +23,31 @@ __Requires Ruby 1.9.2 or later.__
 
 ## Configuration
 
-...
+Before utilized, method_cacher needs to be configured with a cache store for its use.
+The cache store needs to be compatible with ActiveSupport::Cache.
+
+Two styles of configuration are possible:
+
+```ruby
+MethodCacher.configure do |c|
+    c.caching_strategy = the_cache_store # Example: ActiveSupport::Cache.lookup_store(:memory_store)
+end
+```
+
+and
+
+```ruby
+MethodCacher.configure do
+    config.caching_strategy = the_cache_store # Example: ActiveSupport::Cache.lookup_store(:memory_store)
+end
+```
+
+If used with Rails and no cache store is specified, method_cacher automatically uses the cache store configured with rails
+through a call to `Rails.cache`.
 
 ## Usage
 
-Include the method cacher module in the class whose methods you wish to cache.
+Include the `MethodCacher::Base` module in the class whose methods you wish to cache.
 
 ```ruby
 include MethodCacher::Base
@@ -47,13 +67,13 @@ __Options:__
 
 + :singleton - Singleton methods to be cached are specified in an array of symbols passed through this option.
 + :obj\_key - A _proc_ that accepts the cached object as a single parameter.  This _proc_ should return a value identifying this object.
-    If this option is not specified, the object key defaults to the value returned by a method named _id_, which is convenient for usage
+    If this option is not specified, the object key defaults to the value returned by an instance method named _id_, which is convenient for usage
     with ActiveRecord objects.
 
 `cache_method` can take any number of instance or singleton methods at once.
 
 Subsequent calls to `cache_method` are possible in order to specify additional methods to be cached.
-Specifying :obj\_id multiple times results in the last one being used for the class.
+Specifying `:obj_id` multiple times results in the last one being used for the class.
 
 `cache_method` can be called _before_ or _after_ the specified methods are defined.
 

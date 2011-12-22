@@ -83,11 +83,3 @@ clear the cache for the given set of arguments.
 
 So for example, issuing `clear_cache_for_foo('a')`, would clear the cache for a call to `foo('a')`
 but not to `foo('b')`.
-
-
-
-
-# Implementation inspired by the following:
-# http://stackoverflow.com/questions/1372515/aliasing-activerecord-methods-inside-plugin
-# http://railstips.org/blog/archives/2006/11/18/class-and-instance-variables-in-ruby/
-# http://www.ruby-forum.com/topic/120416

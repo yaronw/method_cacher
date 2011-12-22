@@ -13,7 +13,8 @@ __Features:__
 
 ## Installation
 
-Add the `method_cacher` gem your Gemfile and run the `bundle` command to install it.
+Run the command `gem install method_cacher`, or if used in a Rails project,
+add the `method_cacher` gem your Gemfile and run the `bundle` command to install it.
 
 ```ruby
 gem 'method_cacher'

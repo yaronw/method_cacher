@@ -5,9 +5,9 @@ require 'method_cacher/version'
 Gem::Specification.new do |gem|
   gem.authors       = ["Yaron Walfish"]
   gem.email         = ["yaronw@yaronw.com"]
-  gem.description   = %q{Caches Instance and Singleton Methods}
+  gem.description   = %q{Easily cache instance and class methods of ActiveRecord or any object.}
   gem.summary       = %q{Wraps specified instance and singleton methods with the Rails caching mechanism.}
-  gem.homepage      = ""
+  gem.homepage      = "https://github.com/yaronw/method_cacher"
 
   gem.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   gem.files         = `git ls-files`.split("\n")

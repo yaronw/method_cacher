@@ -1,4 +1,4 @@
-# Method Cacher
+# Method Cacher [![Build Status](https://secure.travis-ci.org/yaronw/method_cacher.png)](http://travis-ci.org/yaronw/method_cacher)
 
 Wraps specified methods with a mechanism that caches the return values.
 

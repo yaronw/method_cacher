@@ -260,5 +260,5 @@ class EighthClass
     Dummy.function
   end
 
-  #caches_method :foo2, :foo4
+  caches_method :foo2, :foo4
 end

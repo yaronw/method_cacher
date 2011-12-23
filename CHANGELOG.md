@@ -6,3 +6,8 @@
 
 + Added more details to the gemspec.
 
+## v0.0.3
+
++ Added documentation to README.md.
++ Fixed some specs.
+

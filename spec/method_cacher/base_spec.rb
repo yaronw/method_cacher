@@ -72,7 +72,6 @@ describe MethodCacher::Base do
 
       it "should cache protected INSTANCE methods" do
         obj = EighthClass.new
-        debugger
         lambda { obj.send(:foo1) }.should be_twice_the_same
       end
 

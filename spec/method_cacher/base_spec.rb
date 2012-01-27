@@ -193,6 +193,11 @@ describe MethodCacher::Base do
         obj2.foo.should_not == obj1.foo
       end
 
+      it "should not cache if :obj_key evaluates to nil" do
+        obj = NinthClass.new
+        lambda { obj.foo }.should_not be_twice_the_same
+      end
+
       it "should raise an exception if neither an :obj_key option is given nor the default fallback :id method is defined" do
         obj = SixthClass.new
         lambda { obj.foo }.should raise_error(NoMethodError)

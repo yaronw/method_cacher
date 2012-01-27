@@ -262,3 +262,14 @@ class EighthClass
 
   caches_method :foo2, :foo4
 end
+
+
+class NinthClass
+  include MethodCacher::Base
+
+  caches_method :foo, obj_key: proc { |obj| nil }
+
+  def foo
+    Dummy.function
+  end
+end

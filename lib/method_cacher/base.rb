@@ -152,6 +152,7 @@ module MethodCacher
       # Creates the key used to cache a method of the object.
       def cached_method_key(method_name, *args)
         obj_key = self.class.obj_key.call(self)
+        return nil unless obj_key # unable to form key and cache if obj_key evaluates to nil
         [self.class.name, obj_key, method_name, *args]
       end
     end

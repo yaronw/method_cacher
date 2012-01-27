@@ -1,4 +1,4 @@
-# Method Cacher [![Build Status](https://secure.travis-ci.org/yaronw/method_cacher.png)](http://travis-ci.org/yaronw/method_cacher)
+# Method Cacher
 
 Wraps specified methods with a mechanism that caches the return values.
 
@@ -43,8 +43,8 @@ MethodCacher.configure do
 end
 ```
 
-If used with Rails and no cache store is specified, method_cacher automatically uses the cache store configured with rails
-through a call to `Rails.cache`.
+If used with Rails and no cache store is specified, method_cacher automatically uses the cache store configured in Rails
+by calling `Rails.cache`.
 
 ## Usage
 
@@ -69,7 +69,8 @@ __Options:__
 + :singleton - Singleton methods to be cached are specified in an array of symbols passed through this option.
 + :obj\_key - A _proc_ that accepts the cached object as a single parameter.  This _proc_ should return a value identifying this object.
     If this option is not specified, the object key defaults to the value returned by an instance method named _id_, which is convenient for usage
-    with ActiveRecord objects.
+    with ActiveRecord objects.  In cases when obj\_key evaluates to a nil, such as when using an ActiveRecord that hasn't been saved,
+    the cache is not used.
 
 `cache_method` can take any number of instance or singleton methods at once.
 
@@ -104,3 +105,17 @@ clear the cache for the given set of arguments.
 
 So for example, issuing `clear_cache_for_foo('a')`, would clear the cache for a call to `foo('a')`
 but not to `foo('b')`.
+
+# Examples
+
+## Caching ActiveRecord Methods That Return Relations
+
+Consider the following ActiveRecord class:
+
+```ruby
+class Factory < ActiveRecord::Base
+    has_many :widgets
+end
+```
+
+TODO: Continue here

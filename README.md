@@ -118,4 +118,3 @@ class Factory < ActiveRecord::Base
 end
 ```
 
-TODO: Continue here

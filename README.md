@@ -106,15 +106,4 @@ clear the cache for the given set of arguments.
 So for example, issuing `clear_cache_for_foo('a')`, would clear the cache for a call to `foo('a')`
 but not to `foo('b')`.
 
-# Examples
-
-## Caching ActiveRecord Methods That Return Relations
-
-Consider the following ActiveRecord class:
-
-```ruby
-class Factory < ActiveRecord::Base
-    has_many :widgets
-end
-```
 
